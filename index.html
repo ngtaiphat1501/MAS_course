@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAS291 - Hệ thống Ôn tập Xác suất & Thống kê</title>
+  
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom CSS stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Load marked.js to render Markdown notes dynamically -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Load Mermaid.js to render diagrams dynamically -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'dark',
+        securityLevel: 'loose'
+      });
+    }
+  </script>
+  
+  <!-- Configure MathJax for LaTeX mathematical formula rendering -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="tex2jax_ignore">
+  
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fa-solid fa-square-root-variable brand-icon"></i>
+        <span>MAS291 Hub</span>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <a href="#" class="menu-item active" data-view="dashboard" id="btn-nav-dashboard">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Trang chủ</span>
+        </a>
+        <a href="#" class="menu-item" data-view="exams-select" id="btn-nav-exams">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Luyện đề thi</span>
+        </a>
+        <a href="#" class="menu-item" data-view="custom-quiz-config" id="btn-nav-custom">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Luyện tập tự do</span>
+        </a>
+        <a href="#" class="menu-item" data-view="study-center" id="btn-nav-study">
+          <i class="fa-solid fa-book-open"></i>
+          <span>Học lý thuyết</span>
+        </a>
+        <a href="#" class="menu-item" data-view="question-bank" id="btn-nav-bank">
+          <i class="fa-solid fa-database"></i>
+          <span>Ngân hàng câu hỏi</span>
+        </a>
+      </nav>
+      
+      <!-- User stats box in sidebar -->
+      <div class="sidebar-stats-card">
+        <h4>Tiến độ của bạn</h4>
+        <div class="stat-row">
+          <span>Đã hoàn thành:</span>
+          <span id="sidebar-completed-count">0/3 đề</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="sidebar-progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="stat-row mt-2">
+          <span>Điểm TB:</span>
+          <span id="sidebar-avg-score">0.0/10</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- VIEW 1: DASHBOARD -->
+      <section id="view-dashboard" class="content-section active">
+        <header class="section-header">
+          <h1>Chào mừng đến với MAS291 Hub</h1>
+          <p>Hệ thống tự ôn luyện môn Xác suất và Thống kê trực quan dành riêng cho bạn</p>
+        </header>
+        
+        <!-- Key Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card card-cyan">
+            <div class="stat-card-icon"><i class="fa-solid fa-clipboard-question"></i></div>
+            <div class="stat-card-info">
+              <span class="stat-label">Tổng số câu hỏi</span>
+              <span class="stat-value" id="dash-total-q">150</span>
+            </div>
+          </div>
+          <div class="stat-card card-indigo">
+            <div class="stat-card-icon"><i class="fa-solid fa-square-check"></i></div>
+            <div class="stat-card-info">
+              <span class="stat-label">Đề thi đã luyện</span>
+              <span class="stat-value" id="dash-completed-tests">0</span>
+            </div>
+          </div>
+          <div class="stat-card card-emerald">
+            <div class="stat-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <div class="stat-card-info">
+              <span class="stat-label">Điểm trung bình</span>
+              <span class="stat-value" id="dash-avg-score">0.0</span>
+            </div>
+          </div>
+          <div class="stat-card card-pink">
+            <div class="stat-card-icon"><i class="fa-solid fa-bullseye"></i></div>
+            <div class="stat-card-info">
+              <span class="stat-label">Tỷ lệ chính xác</span>
+              <span class="stat-value" id="dash-accuracy">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-split">
+          <!-- Main Actions -->
+          <div class="dashboard-main-actions">
+            <h3 class="section-title"><i class="fa-solid fa-bolt icon-margin"></i> Bắt đầu ngay</h3>
+            <div class="action-grid">
+              <div class="action-card" id="btn-dash-exam-1">
+                <div class="action-card-header">
+                  <span class="badge badge-cyan">Đề 01</span>
+                  <h3>MAS291 Practice Exam 1</h3>
+                </div>
+                <p>Đề trắc nghiệm 50 câu (70% lý thuyết / 30% bài tập). Thời gian làm bài 90 phút.</p>
+                <button class="btn btn-primary">Làm Đề 1 <i class="fa-solid fa-chevron-right ml-1"></i></button>
+              </div>
+              <div class="action-card" id="btn-dash-exam-2">
+                <div class="action-card-header">
+                  <span class="badge badge-indigo">Đề 02</span>
+                  <h3>MAS291 Practice Exam 2</h3>
+                </div>
+                <p>Đề trắc nghiệm 50 câu (70% lý thuyết / 30% bài tập) bám sát cấu trúc đề thi PE.</p>
+                <button class="btn btn-primary">Làm Đề 2 <i class="fa-solid fa-chevron-right ml-1"></i></button>
+              </div>
+              <div class="action-card" id="btn-dash-study">
+                <div class="action-card-header">
+                  <span class="badge badge-emerald">Lý Thuyết</span>
+                  <h3>Công thức & Lý thuyết</h3>
+                </div>
+                <p>Xem tóm tắt lý thuyết, giải thích định lý Bayes, phân phối xác suất và các bảng công thức nhanh.</p>
+                <button class="btn btn-success">Mở Tài Liệu <i class="fa-solid fa-book ml-1"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick study advice -->
+          <div class="dashboard-side-panel">
+            <h3 class="section-title"><i class="fa-solid fa-lightbulb icon-margin"></i> Chiến thuật ôn thi</h3>
+            <div class="study-tips-card">
+              <div class="tip-item">
+                <i class="fa-solid fa-circle-check text-cyan"></i>
+                <p><strong>Lý thuyết chiếm 70%</strong>: Hãy ôn thật kỹ các định nghĩa phân phối xác suất và điều kiện áp dụng.</p>
+              </div>
+              <div class="tip-item">
+                <i class="fa-solid fa-circle-check text-cyan"></i>
+                <p><strong>Định lý Bayes</strong>: Bài toán chẩn đoán y tế, máy báo lỗi luôn xuất hiện trong đề thi. Nhớ lập bảng phân hoạch.</p>
+              </div>
+              <div class="tip-item">
+                <i class="fa-solid fa-circle-check text-cyan"></i>
+                <p><strong>Ước lượng & Kiểm định</strong>: Chú ý điều kiện dùng phân phối Z (đã biết phương sai) hoặc t (chưa biết phương sai).</p>
+              </div>
+              <button class="btn btn-outline btn-full-width mt-3" id="btn-dash-read-strategy">Xem chi tiết Chiến thuật Ôn luyện</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: EXAMS SELECTION -->
+      <section id="view-exams-select" class="content-section">
+        <header class="section-header">
+          <h1>Danh sách Đề thi thử MAS291</h1>
+          <p>Chọn một đề thi để bắt đầu làm bài kiểm tra trong thời gian giới hạn</p>
+        </header>
+        
+        <div class="exams-grid" id="exams-container">
+          <!-- Dynamically populated from JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: EXAM TESTING AREA -->
+      <section id="view-exam-testing" class="content-section full-width-section">
+        <div class="exam-top-bar">
+          <div class="exam-info">
+            <h2 id="exam-current-title">MAS291 Practice Exam 1</h2>
+            <div class="exam-meta">
+              <span class="exam-meta-item"><i class="fa-solid fa-circle-nodes"></i> <span id="exam-q-chapter">Chapter 2: Probability Theory</span></span>
+              <span class="exam-meta-item"><i class="fa-solid fa-tag"></i> Loại: <span id="exam-q-type">Theory</span></span>
+            </div>
+          </div>
+          <div class="exam-timer" id="exam-timer-box">
+            <i class="fa-solid fa-clock"></i>
+            <span id="exam-timer-clock">90:00</span>
+          </div>
+          <div class="exam-actions">
+            <button class="btn btn-warning" id="btn-flag-question">
+              <i class="fa-regular fa-flag" id="flag-icon"></i> <span>Đánh dấu câu này</span>
+            </button>
+            <button class="btn btn-danger btn-large" id="btn-submit-exam">
+              <i class="fa-solid fa-paper-plane mr-1"></i> Nộp bài
+            </button>
+          </div>
+        </div>
+
+        <div class="exam-layout">
+          <!-- Left Column: Question Content -->
+          <div class="exam-main-panel">
+            <div class="question-card">
+              <div class="question-header">
+                <span class="question-number">Câu <span id="exam-current-num-display">1</span>/50</span>
+              </div>
+              <div class="question-body tex2jax_process" id="exam-question-text">
+                <!-- Question text rendering -->
+              </div>
+              
+              <div class="options-container" id="exam-options-container">
+                <!-- A, B, C, D choices rendering -->
+              </div>
+            </div>
+            
+            <div class="question-navigation-controls">
+              <button class="btn btn-secondary" id="btn-prev-question">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Câu trước
+              </button>
+              <button class="btn btn-secondary" id="btn-next-question">
+                Câu tiếp theo <i class="fa-solid fa-arrow-right ml-1"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Navigation Grid -->
+          <div class="exam-side-panel">
+            <h3>Bản đồ câu hỏi</h3>
+            <div class="navigation-grid" id="exam-nav-grid">
+              <!-- Grid of buttons 1-50 populated dynamically -->
+            </div>
+            
+            <div class="grid-legend">
+              <div class="legend-item"><span class="legend-dot dot-unattempted"></span><span>Chưa làm</span></div>
+              <div class="legend-item"><span class="legend-dot dot-current"></span><span>Đang xem</span></div>
+              <div class="legend-item"><span class="legend-dot dot-answered"></span><span>Đã làm</span></div>
+              <div class="legend-item"><span class="legend-dot dot-flagged"></span><span>Đã đánh dấu</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: CUSTOM QUIZ CONFIGURATION -->
+      <section id="view-custom-quiz-config" class="content-section">
+        <header class="section-header">
+          <h1>Tự tạo đề ôn luyện MAS291</h1>
+          <p>Tùy chọn ôn thi theo từng chương cụ thể, số lượng câu hỏi và thời gian tùy thích</p>
+        </header>
+
+        <div class="config-card">
+          <form id="custom-quiz-form">
+            <!-- Select Chapters -->
+            <div class="form-group">
+              <label class="form-label">Chọn chương ôn tập:</label>
+              <div class="chapters-multiselect" id="custom-chapters-select">
+                <!-- Chapters checkboxes populated from JS -->
+              </div>
+              <div class="mt-2">
+                <button type="button" class="btn btn-xs btn-outline" id="btn-select-all-chapters">Chọn tất cả</button>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-deselect-all-chapters">Bỏ chọn tất cả</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <!-- Question count -->
+              <div class="form-group col-md-4">
+                <label class="form-label" for="custom-q-count">Số lượng câu hỏi:</label>
+                <select class="form-control" id="custom-q-count">
+                  <option value="10">10 câu</option>
+                  <option value="20" selected>20 câu</option>
+                  <option value="30">30 câu</option>
+                  <option value="50">50 câu</option>
+                </select>
+              </div>
+
+              <!-- Time Limit -->
+              <div class="form-group col-md-4">
+                <label class="form-label" for="custom-time-limit">Thời gian làm bài:</label>
+                <select class="form-control" id="custom-time-limit">
+                  <option value="0">Không giới hạn thời gian</option>
+                  <option value="20">20 phút</option>
+                  <option value="40" selected>40 phút</option>
+                  <option value="90">90 phút</option>
+                </select>
+              </div>
+
+              <!-- Question Type -->
+              <div class="form-group col-md-4">
+                <label class="form-label" for="custom-q-type">Loại câu hỏi:</label>
+                <select class="form-control" id="custom-q-type">
+                  <option value="all" selected>Tất cả (Lý thuyết & Bài tập)</option>
+                  <option value="Theory">Chỉ câu hỏi lý thuyết (Theory)</option>
+                  <option value="Application">Chỉ câu hỏi bài tập áp dụng (Application)</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-large btn-full-width mt-3" id="btn-start-custom-quiz">
+              <i class="fa-solid fa-play mr-1"></i> Bắt đầu làm bài trắc nghiệm
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- VIEW 5: STUDY CENTER (NOTES READER) -->
+      <section id="view-study-center" class="content-section study-section">
+        <header class="section-header">
+          <h1>Tài liệu học tập & Lý thuyết MAS291</h1>
+          <p>Xem tóm tắt bài giảng từ Obsidian Second Brain, hỗ trợ định dạng công thức toán học</p>
+        </header>
+
+        <div class="study-layout">
+          <!-- Left Sidebar: Chapters Index -->
+          <div class="study-sidebar">
+            <h3 class="sidebar-title">Danh mục bài học</h3>
+            <div class="study-chapters-list" id="study-chapters-nav">
+              <!-- Populated dynamically from chapters.json -->
+            </div>
+          </div>
+
+          <!-- Right Content: Notes Viewer -->
+          <div class="study-content-panel">
+            <div class="study-content-card">
+              <div class="study-content-body markdown-body tex2jax_process" id="study-notes-body">
+                <div class="empty-state">
+                  <i class="fa-solid fa-book-open"></i>
+                  <p>Chọn một chương bên trái để bắt đầu đọc tài liệu ôn tập</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: QUESTION BANK BROWSER -->
+      <section id="view-question-bank" class="content-section">
+        <header class="section-header">
+          <h1>Kho ngân hàng 150 câu hỏi trắc nghiệm</h1>
+          <p>Duyệt qua toàn bộ ngân hàng câu hỏi, lọc theo chương hoặc tìm kiếm theo từ khóa</p>
+        </header>
+
+        <div class="search-filter-bar">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="qbank-search-input" placeholder="Tìm kiếm câu hỏi (nhập từ khóa tiếng Anh hoặc công thức)...">
+          </div>
+          
+          <select class="filter-dropdown" id="qbank-filter-chapter">
+            <option value="all">Tất cả các chương</option>
+            <option value="Chapter 2">Chương 2: Xác suất cơ bản</option>
+            <option value="Chapter 3">Chương 3: Biến ngẫu nhiên rời rạc</option>
+            <option value="Chapter 4">Chương 4: Biến ngẫu nhiên liên tục</option>
+            <option value="Chapter 6">Chương 6: Thống kê mô tả</option>
+            <option value="Chapter 7">Chương 7: Ước lượng điểm & CLT</option>
+            <option value="Chapter 8">Chương 8: Khoảng tin cậy</option>
+            <option value="Chapter 9">Chương 9: Kiểm định giả thuyết</option>
+            <option value="Chapter 10">Chương 10: Suy diễn hai mẫu</option>
+            <option value="Chapter 11">Chương 11: Hồi quy tuyến tính</option>
+          </select>
+
+          <select class="filter-dropdown" id="qbank-filter-type">
+            <option value="all">Mọi loại câu hỏi</option>
+            <option value="Theory">Lý thuyết (Theory)</option>
+            <option value="Application">Bài tập áp dụng (Application)</option>
+          </select>
+        </div>
+
+        <div class="qbank-results-info">
+          Hiển thị <span id="qbank-matches-count">150</span> / 150 câu hỏi
+        </div>
+
+        <div class="qbank-list" id="qbank-questions-container">
+          <!-- Dynamically populated list of questions -->
+        </div>
+      </section>
+
+      <!-- VIEW 7: EXAM SCORECARD RESULTS -->
+      <section id="view-scorecard" class="content-section results-section">
+        <header class="section-header align-center">
+          <div class="success-icon-wrapper animate-bounce">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h1>Nộp bài thi thành công!</h1>
+          <p>Hệ thống đã tự động chấm điểm bài làm trắc nghiệm của bạn</p>
+        </header>
+
+        <div class="scorecard-grid">
+          <!-- Core Score Summary Card -->
+          <div class="score-summary-card">
+            <h3>Kết quả tổng quan</h3>
+            <div class="score-display">
+              <span class="score-number" id="result-score-value">9.2</span>
+              <span class="score-max">/ 10</span>
+            </div>
+            
+            <div class="results-stats-list">
+              <div class="result-stat-row">
+                <span>Số câu đúng:</span>
+                <span id="result-correct-count" class="text-emerald">46/50</span>
+              </div>
+              <div class="result-stat-row">
+                <span>Thời gian làm bài:</span>
+                <span id="result-time-spent">25 phút 10 giây</span>
+              </div>
+              <div class="result-stat-row">
+                <span>Tỷ lệ chính xác:</span>
+                <span id="result-accuracy-percent">92%</span>
+              </div>
+              <div class="result-stat-row">
+                <span>Đánh giá năng lực:</span>
+                <span id="result-grade-badge" class="badge badge-emerald">Xuất Sắc</span>
+              </div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn btn-primary btn-full-width" id="btn-go-review-mode">
+                <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> Xem chi tiết đáp án câu hỏi
+              </button>
+              <button class="btn btn-outline btn-full-width mt-2" id="btn-back-to-dashboard">
+                <i class="fa-solid fa-house mr-1"></i> Quay về Trang chủ
+              </button>
+            </div>
+          </div>
+
+          <!-- Performance Analysis by Chapter -->
+          <div class="performance-analysis-card">
+            <h3>Năng lực theo từng chương học</h3>
+            <div class="chapter-performance-list" id="result-chapter-performances">
+              <!-- Populated dynamically with performance percentage bars -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 8: DETAILED ANSWERS REVIEW MODE -->
+      <section id="view-review-mode" class="content-section">
+        <header class="section-header">
+          <div class="flex-between">
+            <div>
+              <h1 id="review-exam-title">Chi tiết đáp án - MAS291 Practice Exam 1</h1>
+              <p>Xem lại chi tiết từng câu hỏi, đáp án đúng của hệ thống và lựa chọn của bạn</p>
+            </div>
+            <button class="btn btn-secondary" id="btn-review-back-to-scorecard">
+              <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại bảng điểm
+            </button>
+          </div>
+        </header>
+
+        <div class="review-questions-list" id="review-questions-container">
+          <!-- Populated dynamically with all 50 questions, showing color status for A/B/C/D -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Loading Modal Overlay -->
+  <div class="modal-overlay" id="loading-overlay">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <p id="loading-message">Đang nạp kho câu hỏi...</p>
+    </div>
+  </div>
+
+  <!-- Script logic link -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
